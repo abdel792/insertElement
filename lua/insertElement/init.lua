@@ -17,7 +17,7 @@ local insertElementItem = funcMenu:add("Insérer une fonction ou &propriété (c
 insertionMenu:add("Fun&ction ou propriété", funcMenu, "Sous-menu du menu insertion proposant l'insertion d'une fonction ou propriété");
 
 -- Création de la fonction qui va insérer de manière effective, la propriété ou méthode à l'emplacement du curseur.
-local function insertElement(evt, obj)
+local function insertElement(evt, element, obj)
 -- On vérifie le paramètre obj.
 if obj then
 if type(obj) ~= "table" then
@@ -25,9 +25,9 @@ obj = getmetatable(obj)
 end
 end
 -- Création d'une variable locale pour le premier paramètre de Dialogs.chooseOne.
-local message = obj == nil and "Choisissez la fonction LUA que vous souhaitez insérer" or "Choisissez la propriété ou méthode que vous souhaitez insérer";
+local message = obj == nil and "Choisissez la fonction du " .. element .. " que vous souhaitez insérer" or "Choisissez la propriété ou méthode de l'objet " .. element .. " que vous souhaitez insérer";
 -- Création d'une variable locale pour le second paramètre de Dialogs.chooseOne.
-local title = obj == nil and "Insérer une fonction depuis le builtin de LUA" or "Insérez une propriété ou méthode";
+local title = obj == nil and "Insérer une fonction du " .. element or "Insérez une propriété ou méthode de l'objet " .. element;
 -- Création d'une variable locale pour le troisième paramètre de Dialogs.chooseOne, c'est une table vide pour le moment.
 local options = {};
 for key, value in pairs(obj == nil and _G or obj) do
@@ -46,8 +46,10 @@ end
 end
 -- C'est bon, on peut trier notre table "options";
 table.sort(options);
--- Création d'une variable locale pour le quatrième et dernier paramètre de Dialogs.chooseOne, il s'agit de l'index de l'élément qui sera sélectionné par défaut.
+-- Création d'une variable locale pour le quatrième paramètre de Dialogs.chooseOne, il s'agit de l'index de l'élément qui sera sélectionné par défaut.
 local selection = 1;
+-- Le cinquième paramètre : "sorted" de chooseOne a été ignoré, c'est celui qui permet de choisir ou pas de trier les éléments.
+-- C'est un booléen dont l'état est sur false par défaut, et c'est tant mieux, car on ne souhaite pas trier ces éléments en particulier.
 -- C'est bon, on peut afficher la boîte de dialogue chooseOne.
 local chooseAFunction = Dialogs.chooseOne(message, title, options, selection);
 if chooseAFunction then -- Si l'on a pas validé sur le bouton annulé ou pressé sur Echappe.
@@ -85,71 +87,77 @@ local options = {"Builtin global de LUA",
 "WebRequest",
 "WebResponse",
 "io",
+"json",
 "string",
 "utf8"
 };
--- Création d'une variable locale pour le quatrième et dernier paramètre de Dialogs.chooseOne, il s'agit de l'index de l'élément qui sera sélectionné par défaut..
+-- Création d'une variable locale pour le quatrième paramètre de Dialogs.chooseOne, il s'agit de l'index de l'élément qui sera sélectionné par défaut..
 local selection = 1;
+-- Le cinquième paramètre : "sorted" de chooseOne a été ignoré, c'est celui qui permet de choisir ou pas de trier les éléments.
+-- C'est un booléen dont l'état est sur false par défaut, et c'est tant mieux, car on ne souhaite pas trier ces éléments en particulier.
 -- C'est bon, on peut afficher la boîte de dialogue chooseOne.
-local chooseAnElement = Dialogs.chooseOne(message, title, options, selection);
-if chooseAnElement then -- Si l'on a pas pressé sur Echappe ou validé le bouton annuler.
-local element = options[chooseAnElement];
+local chooseAType = Dialogs.chooseOne(message, title, options, selection);
+if chooseAType then -- Si l'on a pas pressé sur Echappe ou validé le bouton annuler.
 -- Initialisation d'une variable locale obj à nil.
 local obj = nil;
+-- Récupération de la valeur du type requis dans une variable locale intitulée "element";
+local element = options[chooseAType];
 -- Si l'utilisateur choisi d'insérer une fonction globale du builtin, on exécute le traitement ci-dessous.
-if chooseAnElement == 1 then
+if chooseType == 1 then
 -- On insère l'élément, cependant, le paramètre obj n'est pas passé à la fonction insertElement, uniquement pour les fonctions du builtin.
-insertElement(evt);
+insertElement(evt, element);
 -- Les traitements ci-dessous vont affecter une valeur à la variable locale obj, selon l'élément choisi par l'utilisateur.
-elseif chooseAnElement == 2 then
+elseif chooseAType == 2 then
 obj = app;
-elseif chooseAnElement == 3 then
+elseif chooseAType == 3 then
 obj = CommandEvent;
-elseif chooseAnElement == 4 then
+elseif chooseAType == 4 then
 obj = Dialogs;
-elseif chooseAnElement == 5 then
+elseif chooseAType == 5 then
 obj = Document;
-elseif chooseAnElement == 6 then
+elseif chooseAType == 6 then
 obj = Event;
-elseif chooseAnElement == 7 then
+elseif chooseAType == 7 then
 obj = EventHandler;
-elseif chooseAnElement == 8 then
+elseif chooseAType == 8 then
 obj = InputStream;
-elseif chooseAnElement == 9 then
+elseif chooseAType == 9 then
 obj = KeyEvent;
-elseif chooseAnElement == 10 then
+elseif chooseAType == 10 then
 obj = Menu;
-elseif chooseAnElement == 11 then
+elseif chooseAType == 11 then
 obj = MenuBar;
-elseif chooseAnElement == 12 then
+elseif chooseAType == 12 then
 obj = MenuItem;
-elseif chooseAnElement == 13 then
+elseif chooseAType == 13 then
 obj = MouseEvent;
-elseif chooseAnElement == 14 then
+elseif chooseAType == 14 then
 obj = OutputStream;
-elseif chooseAnElement == 15 then
+elseif chooseAType == 15 then
 obj = Path;
-elseif chooseAnElement == 16 then
+elseif chooseAType == 16 then
 obj = Process;
-elseif chooseAnElement == 17 then
+elseif chooseAType == 17 then
 obj = ProcessEvent;
-elseif chooseAnElement == 18 then
+elseif chooseAType == 18 then
 obj = TextEditor;
-elseif chooseAnElement == 19 then
+elseif chooseAType == 19 then
 obj = Timer;
-elseif chooseAnElement == 20 then
+elseif chooseAType == 20 then
 obj = WebRequest;
-elseif chooseAnElement == 21 then
+elseif chooseAType == 21 then
 obj = WebResponse;
-elseif chooseAnElement == 22 then
+elseif chooseAType == 22 then
 obj = io;
-elseif chooseAnElement == 23 then
+elseif chooseAType == 23 then
+obj = json;
+elseif chooseAType == 24 then
 obj = string;
-elseif chooseAnElement == 24 then
+elseif chooseAType == 25 then
 obj = utf8;
 end
 -- On insère l'élément, le paramètre obj est passé cette fois-ci, pour les autres cas de figure.
-insertElement(evt, obj);
+insertElement(evt, element, obj);
 end
 end
 
